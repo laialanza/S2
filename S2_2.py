@@ -1,19 +1,16 @@
 import subprocess
-
 video = input("Introduce the directory of the video you want to cut: \n ")
-time_sel = input("How many seconds do you want from the video: ")
-sec  = "00:00:" + time_sel
-subprocess.call(['ffmpeg','-ss', '00:00:00', '-i', video, '-to', sec , '-c:a',
-                 'copy', 'cut_video_S2.mp4'])
+subprocess.call(
+            ['ffmpeg', '-ss', '00:00:00', '-i', video, '-to', '00:01:00',
+             '-c', 'copy', '1min.mp4'])
 
-#To obtain the mp3 audio of the video
-subprocess.call(["ffmpeg", "-i", "cut_video_S2.mp4", "-acodec", "mp3", "audio_mp3.mp3"])
+# Export the 1 min audio as MP3 stereo audio track
+subprocess.call(['ffmpeg', '-i', '1min.mp4', '-vn', '-acodec', 'mp3', 'bbbMP3.mp3'])
 
-#To obtain the aac audio of the video
-subprocess.call(["ffmpeg", "-i", "cut_video_S2.mp4", "-acodec", "aac", "audio_aac.aac"])
+# Export BBB(1min) audio in AAC w/ lower bitrate
+subprocess.call(['ffmpeg', '-i', '1min.mp4', '-vn', '-acodec', 'aac', "-b:a", "70k", 'bbbAAC.aac'])
 
-#Package them into a mp4
-subprocess.call(["ffmpeg", "-i", "cut_video_S2.mp4", "-i", "audio_mp3.mp3", "-i",
-                 "audio_aac.aac", "-map", "0", "-map", "1", "-map", "2",
-                 "S2_2_mp4_video.mp4"])
-
+# Create container
+subprocess.call(['ffmpeg', '-i', '1min.mp4', '-i', 'bbbMP3.mp3', '-i', 'bbbAAC.aac',
+                 "-c:v", "copy", "-c:a", "copy", "-c:a", "copy", '-map', '0:v', '-map', '1:a',
+                 '-map', '2:a', 'container.mp4'])
